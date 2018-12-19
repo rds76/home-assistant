@@ -148,7 +148,7 @@ class LuciApDeviceScanner(DeviceScanner):
                                                      interface,
                                                      self.host))
 
-           elif (index + 1) == len(self.interfaces):
+           elif ((index + 1) == len(self.interfaces)) and (len(self.last_results) == 0):
               return False
            
         _LOGGER.debug("MAC list for {0}: {1} ".format(self.host, str(self.last_results)))
