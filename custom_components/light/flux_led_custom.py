@@ -248,8 +248,7 @@ class FluxLight(Light):
             return
 
         # Effect selection
-        if effect in EFFECT_MAP:
-            _LOGGER.warning(effect_speed)
+        if effect in EFFECT_MAP:            
             self._bulb.setPresetPattern(EFFECT_MAP[effect], effect_speed)
             return
 
