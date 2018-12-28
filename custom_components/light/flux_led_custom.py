@@ -14,7 +14,7 @@ from homeassistant.const import CONF_DEVICES, CONF_NAME, CONF_PROTOCOL
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS, ATTR_HS_COLOR, ATTR_EFFECT, ATTR_WHITE_VALUE,
     EFFECT_COLORLOOP, EFFECT_RANDOM, SUPPORT_BRIGHTNESS, SUPPORT_EFFECT,
-    SUPPORT_COLOR, SUPPORT_WHITE_VALUE, Light, PLATFORM_SCHEMA)
+    SUPPORT_COLOR, SUPPORT_WHITE_VALUE, Light, PLATFORM_SCHEMA, ATTR_BRIGHTNESS_PCT)
 import homeassistant.helpers.config_validation as cv
 import homeassistant.util.color as color_util
 
@@ -24,7 +24,6 @@ _LOGGER = logging.getLogger(__name__)
 
 CONF_AUTOMATIC_ADD = 'automatic_add'
 ATTR_MODE = 'mode'
-ATTR_EFFECT_SPEED = 'effect_speed'
 
 DOMAIN = 'flux_led_custom'
 
@@ -98,7 +97,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_DEVICES, default={}): {cv.string: DEVICE_SCHEMA},
     vol.Optional(CONF_AUTOMATIC_ADD, default=False):  cv.boolean,
 })
-
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
     """Set up the Flux lights."""
@@ -231,11 +229,13 @@ class FluxLight(Light):
 
         brightness = kwargs.get(ATTR_BRIGHTNESS)
         effect = kwargs.get(ATTR_EFFECT)
-        effect_speed = kwargs.get(ATTR_EFFECT_SPEED, 50)
+        # speed v procentech veme z brightness_pct- default je 50
+        effect_speed = kwargs.get(ATTR_BRIGHTNESS_PCT, 50)
         white = kwargs.get(ATTR_WHITE_VALUE)
 
         # Show warning if effect set with rgb, brightness, or white level
-        if effect and (brightness or white or rgb):
+        #if effect and (brightness or white or rgb):
+        if effect and (white or rgb):
             _LOGGER.warning("RGB, brightness and white level are ignored when"
                             " an effect is specified for a flux bulb")
 
