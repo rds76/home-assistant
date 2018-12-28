@@ -14,7 +14,7 @@ from homeassistant.const import CONF_DEVICES, CONF_NAME, CONF_PROTOCOL
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS, ATTR_HS_COLOR, ATTR_EFFECT, ATTR_WHITE_VALUE,
     EFFECT_COLORLOOP, EFFECT_RANDOM, SUPPORT_BRIGHTNESS, SUPPORT_EFFECT,
-    SUPPORT_COLOR, SUPPORT_WHITE_VALUE, Light, PLATFORM_SCHEMA, ATTR_BRIGHTNESS_PCT)
+    SUPPORT_COLOR, SUPPORT_WHITE_VALUE, Light, PLATFORM_SCHEMA)
 import homeassistant.helpers.config_validation as cv
 import homeassistant.util.color as color_util
 
@@ -229,8 +229,9 @@ class FluxLight(Light):
 
         brightness = kwargs.get(ATTR_BRIGHTNESS)
         effect = kwargs.get(ATTR_EFFECT)
-        # speed v procentech veme z brightness_pct- default je 50
-        effect_speed = kwargs.get(ATTR_BRIGHTNESS_PCT, 50)
+        # brightness percent is not passed as param argument, its calculate as brightness, so wee need to calc back to %
+        # 128 = 50 default
+        effect_speed = int(kwargs.get(ATTR_BRIGHTNESS, 128) / 255 * 100)
         white = kwargs.get(ATTR_WHITE_VALUE)
 
         # Show warning if effect set with rgb, brightness, or white level
@@ -248,6 +249,7 @@ class FluxLight(Light):
 
         # Effect selection
         if effect in EFFECT_MAP:
+            _LOGGER.warning(effect_speed)
             self._bulb.setPresetPattern(EFFECT_MAP[effect], effect_speed)
             return
 
