@@ -32,21 +32,49 @@ function baseentitydisplay(widget_id, url, skin, parameters)
 
     var monitored_entities =  [];
 
+	if ("entity" in parameters && parameters.entity != "")
+    {
+        // Check if the sub_entity should be created by monitoring an attribute of the entity
+        if ("entity_to_sub_entity_attribute" in parameters && parameters.entity_to_sub_entity_attribute != "")
+        {
+            self.sub_entity = parameters.entity;
+            self.sub_entity_attribute = parameters.entity_to_sub_entity_attribute;
+        }
+		// Check if the title2_entity should be created by monitoring an attribute of the entity
+        if ("entity_to_title2_entity_attribute" in parameters && parameters.entity_to_title2_entity_attribute != "")
+        {
+            self.title2_entity = parameters.entity;
+            self.title2_entity_attribute = parameters.entity_to_title2_entity_attribute;
+        }
+    }
+    // Only set up the sub_entity if it was not created already with the entity + attribute
+    if ("sub_entity" in parameters && parameters.sub_entity != "" && !("sub_entity" in self))
+    {
+        // Make sure that we monitor the sub_entity, not an attribute of it
+        self.sub_entity = parameters.sub_entity;
+    }
+	// Only set up the title2_entity if it was not created already with the entity + attribute
+    if ("title2_entity" in parameters && parameters.title2_entity != "" && !("title2_entity" in self))
+    {
+        // Make sure that we monitor the sub_entity, not an attribute of it
+        self.title2_entity = parameters.title2_entity;
+    }
+
     if ("title_entity" in parameters && parameters.title_entity != "")
     {
         monitored_entities.push({"entity": parameters.title_entity, "initial": self.OnTitleStateAvailable, "update": self.OnTitleStateUpdate});
     }
-    if ("title2_entity" in parameters && parameters.title2_entity != "")
+    if ("title2_entity" in self)
     {
-        monitored_entities.push({"entity": parameters.title2_entity, "initial": self.OnTitle2StateAvailable, "update": self.OnTitle2StateUpdate});
+        monitored_entities.push({"entity": self.title2_entity, "initial": self.OnTitle2StateAvailable, "update": self.OnTitle2StateUpdate});
     }
     if ("entity" in parameters)
     {
         monitored_entities.push({"entity": parameters.entity, "initial": self.OnStateAvailable, "update": self.OnStateUpdate});
     }
-    if ("sub_entity" in parameters && parameters.sub_entity != "")
+    if ("sub_entity" in self)
     {
-        monitored_entities.push({"entity": parameters.sub_entity, "initial": self.OnSubStateAvailable, "update": self.OnSubStateUpdate});
+        monitored_entities.push({"entity": self.sub_entity, "initial": self.OnSubStateAvailable, "update": self.OnSubStateUpdate});
     }
 
     // Finally, call the parent constructor to get things moving
@@ -107,7 +135,15 @@ function baseentitydisplay(widget_id, url, skin, parameters)
 
     function set_title2_value(self, state)
     {
-        self.set_field(self, "title2", state.state);
+		if ("title2_entity_attribute" in self && self.title2_entity_attribute != "")
+        {
+            value = state.attributes[self.title2_entity_attribute];
+        }
+        else
+        {
+            value = state.state;
+        }
+        self.set_field(self, "title2", value);
     }
 
     function set_value(self, state)
@@ -136,16 +172,25 @@ function baseentitydisplay(widget_id, url, skin, parameters)
 
     function set_sub_value(self, state)
     {
-        if ("sub_entity_map" in self.parameters)
+		if ("sub_entity_attribute" in self && self.sub_entity_attribute != "")
         {
-            self.set_field(self, "state_text", self.parameters.sub_entity_map[state.state]);
+            statevalue = state.attributes[self.sub_entity_attribute];
         }
         else
         {
-            value = self.map_state(self, state.state);
+            statevalue = state.state;
+        }
+
+        if ("sub_entity_map" in self.parameters)
+        {
+            self.set_field(self, "state_text", self.parameters.sub_entity_map[statevalue]);
+        }
+        else
+        {
+            value = self.map_state(self, statevalue);
             if (isNaN(value))
             {
-                self.set_field(self, "state_text", state.state);
+                self.set_field(self, "state_text", statevalue);
             }
             else
             {
